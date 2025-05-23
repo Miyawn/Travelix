@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,21 +10,25 @@ function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // 👇 Logika validasi bisa ditambahkan di sini
     if (email && password) {
-      navigate("/home"); // Arahkan ke halaman home
+      toast.success("Berhasil login!");
+      navigate("/home");
     } else {
-      alert("Email dan password harus diisi");
+      toast.error("Email dan password harus diisi", {
+        duration: 4000,
+        position: "top-center",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200">
+    <div className="min-h-screen flex items-center justify-center bg-gray-200 text-black px-4">
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
       >
         <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
+
         <div className="mb-4">
           <label className="block mb-1">Email</label>
           <input
@@ -34,6 +39,7 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
+
         <div className="mb-4">
           <label className="block mb-1">Password</label>
           <input
@@ -44,6 +50,7 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+
         <button
           type="submit"
           className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-400"
