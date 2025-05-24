@@ -64,9 +64,11 @@ export default function KamarHotel() {
         className="bg-cover bg-center h-[370px] text-white flex items-center justify-center"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
-        <div className="text-center">
+        <div className="h-[370px] w-full bg-black/60 backdrop-blur-[3px] z-0">
+        <div className="text-center pt-20 z-10 relative">
           <h1 className="text-7xl font-bold">Hotel</h1>
-          <p className="text-lg mt-2 max-w-2xl mx-auto">Lorem ipsum dolor sit amet</p>
+          <p className="text-lg mt-2 max-w-2xl mx-auto">Rencanakan perjalanan Anda dengan percaya diri! Travelix berkomitmen untuk memberikan pengalaman pemesanan hotel yang mulus dan bebas stress.</p>
+        </div>
         </div>
       </div>
 

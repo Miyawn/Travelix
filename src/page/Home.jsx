@@ -10,7 +10,7 @@ function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div
-        className="relative flex-1 bg-cover bg-center text-white flex items-center justify-center text-center px-4 py-20"
+        className="relative flex-1 bg-cover bg-center text-white flex items-center justify-left text-left px-32 py-20"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         {/* Overlay blur gelap yang menutupi seluruh segmen hero */}
@@ -18,14 +18,15 @@ function Home() {
 
         {/* Konten hero */}
         <div className="relative z-10 max-w-3xl">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-            WEBSITE BOOKING HOTEL<br />DAN PENERBANGAN 
+          <h1 className="text-7xl font-bold mb-4 text-white pt-16">
+            TRAVELIX
           </h1>
           <p className="text-sm md:text-base text-gray-300 mb-6">
-            Travelix Menyediakan kemudahan untuk <br />
-            memesan kamar hotel dan tiket pesawat secara online.
+            Travelix Menyediakan kemudahan untuk memesan kamar hotel 
+            dan tiket pesawat secara <br /> online, memberikan pengalaman
+            yang nyaman dan efisien kapanpun dan dimanapun!
           </p>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <div className="flex gap-4 justify-left w-full flex-wrap">
             <button
               onClick={() => navigate("/hotel")}
               className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-300"

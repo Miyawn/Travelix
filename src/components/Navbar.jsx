@@ -6,6 +6,7 @@ function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLogoHovered, setIsLogoHovered] = useState(false); // <- Tambahan untuk logo hover
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,31 +35,33 @@ function Navbar() {
             {/* Logo sebagai image */}
             <Link to="/" className="select-none cursor-pointer">
               <img
-                src="src/assets/logonavbar.png" // Ganti path sesuai lokasi logomu
+                src={isLogoHovered ? "src/assets/3.svg" : "src/assets/2.svg"} // <- Ganti sesuai hover
                 alt="Logo"
-                className="h-10 w-auto"
+                className="h-16 w-auto"
+                onMouseEnter={() => setIsLogoHovered(true)}
+                onMouseLeave={() => setIsLogoHovered(false)}
               />
             </Link>
 
             {/* Desktop menu */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center font-sans font-normal space-x-8">
               <Link
                 to="/flights"
-                className="btn btn-ghost btn-sm text-white hover:text-yellow-400 transition"
+                className="text-white hover:text-yellow-400 transition font-normal"
               >
                 Penerbangan
               </Link>
               <Link
                 to="/hotel"
-                className="btn btn-ghost btn-sm text-white hover:text-yellow-400 transition"
+                className="text-white hover:text-yellow-400 transition font-normal"
               >
                 Hotel
               </Link>
               <button
                 onClick={() => setIsLoginOpen(true)}
-                className="btn btn-warning btn-sm text-black font-semibold hover:bg-yellow-300 transition"
+                className="btn btn-warning"
               >
-                Masuk
+                MASUK
               </button>
             </div>
 
@@ -110,14 +113,14 @@ function Navbar() {
           <div className="md:hidden bg-[#1c1c1c] px-4 pb-4 space-y-2">
             <Link
               to="/flights"
-              className="btn btn-ghost w-full text-white hover:text-yellow-400 transition"
+              className="block text-white hover:text-yellow-400 transition py-2 font-small"
               onClick={() => setIsOpen(false)}
             >
               Penerbangan
             </Link>
             <Link
               to="/hotel"
-              className="btn btn-ghost w-full text-white hover:text-yellow-400 transition"
+              className="block text-white hover:text-yellow-400 transition py-2 font-small"
               onClick={() => setIsOpen(false)}
             >
               Hotel
@@ -127,7 +130,7 @@ function Navbar() {
                 setIsLoginOpen(true);
                 setIsOpen(false);
               }}
-              className="btn btn-warning w-full text-black font-semibold hover:bg-yellow-300 transition"
+              className="btn btn-warning w-full"
             >
               Masuk
             </button>
