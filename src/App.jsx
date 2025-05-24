@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./page/Login";
-import Register from "./page/Register";
+import Login from "./components/Login";
+import Register from "./components/Register";
 import Home from "./page/Home"; // import halaman baru
 import KamarHotel from "./page/KamarHotel";
+import Flights from "./page/Flights";
 import { Toaster } from "react-hot-toast";
 
 function App() {
@@ -13,7 +14,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/kamarhotel" element={<KamarHotel />} />
+        <Route path="/flights" element={<Flights />} />
+        <Route path="/hotel" element={<KamarHotel />} />
       </Routes>
     </BrowserRouter>
   );
