@@ -1,7 +1,7 @@
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
-import bgImage from "../assets/bg1.jpg";
+import bgImage from "../assets/skyview.jpg";
 import { BedDouble, Plane } from "lucide-react"; // <-- Import icon lucide
 
 function Home() {
@@ -16,7 +16,7 @@ function Home() {
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         {/* Overlay blur gelap yang menutupi seluruh segmen hero */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-0" />
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-0" />
 
         {/* Konten hero */}
         <div className="relative z-10 max-w-3xl h-[786px]">

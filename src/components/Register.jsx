@@ -1,61 +1,154 @@
-// src/pages/Register.jsx
-import { Eye } from "lucide-react";
-import { Link } from "react-router-dom"; // ✅ Tambahkan ini
-import Login from "./Login";
+import { useState } from "react";
+import { Eye, EyeOff, Activity } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 export default function Register() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-400">
-      <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Daftar</h2>
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    nama: "",
+    email: "",
+    telp: "",
+    password: "",
+  });
 
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validasi
+    if (!form.nama || !form.email || !form.telp || !form.password) {
+      return toast.error("Semua field wajib diisi!", {
+        position: "top-center",
+      });
+    }
+
+    try {
+      const response = await fetch("http://localhost:4000/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        return toast.error(err.message || "Gagal daftar!", {
+          position: "top-center",
+        });
+      }
+
+      toast.success("Berhasil daftar!", {
+        position: "top-center",
+      });
+
+      // Redirect ke halaman home
+      navigate("/");
+    } catch (error) {
+      console.error("Error saat daftar:", error);
+      toast.error("Terjadi kesalahan!", {
+        position: "top-center",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-500 to-gray-500">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md"
+      >
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          Daftar
+        </h2>
+
+        {/* Nama */}
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Nama</label>
+          <label className="block mb-1 font-medium text-gray-700">Nama</label>
           <input
             type="text"
+            name="nama"
             placeholder="Nama"
-            className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+            value={form.nama}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded border text-black bg-gray-100 focus:outline-none"
           />
         </div>
 
+        {/* Email */}
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Email</label>
+          <label className="block mb-1 font-medium text-gray-700">Email</label>
           <input
             type="email"
+            name="email"
             placeholder="Email@gmail.com"
-            className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded border text-black bg-gray-100 focus:outline-none"
           />
         </div>
 
+        {/* No. Telp */}
         <div className="mb-4">
-          <label className="block font-semibold mb-1">No. Telp</label>
+          <label className="block mb-1 font-medium text-gray-700">
+            No. Telp
+          </label>
           <input
             type="text"
+            name="telp"
             placeholder="0816494839"
-            className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+            value={form.telp}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded border text-black bg-gray-100 focus:outline-none"
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block font-semibold mb-1">Password</label>
+        {/* Password */}
+        <div className="mb-6">
+          <label className="block mb-1 font-medium text-gray-700">
+            Password
+          </label>
           <div className="relative">
             <input
-              type="password"
-              className="w-full px-4 py-2 border rounded bg-gray-100 pr-10 focus:outline-none"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="********"
+              value={form.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 pr-10 rounded border text-black bg-gray-100 focus:outline-none"
             />
-            <Eye className="absolute right-3 top-2.5 w-5 h-5 text-gray-600" />
+            <button
+              type="button"
+              className="absolute right-3 top-2.5 text-gray-600"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 
-        <button className="bg-yellow-500 text-white font-semibold py-2 w-full rounded hover:bg-yellow-600 flex justify-center items-center gap-2">
-          🛏 Daftar
+        {/* Tombol Daftar */}
+        <button
+          type="submit"
+          className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded w-full transition duration-200 flex items-center justify-center gap-2"
+        >
+          <Activity size={15} />
+          Daftar
         </button>
 
-        <div className="mt-4 text-sm text-yellow-700">
-          {/* ✅ Gunakan Link ke halaman login */}
-          <Link to="/">Masuk?</Link>
+        {/* Link ke Login */}
+        <div className="mt-4 text-center text-sm text-gray-700">
+          Sudah punya akun?{" "}
+          <Link to="/" className="text-blue-600 hover:underline">
+            Masuk
+          </Link>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
