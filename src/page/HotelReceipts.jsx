@@ -1,5 +1,5 @@
 // src/pages/HotelReceipts.jsx (atau path yang sesuai)
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
 import BookingConfirmationCard from "../components/BookingConfirmationCard"; // 1. Impor komponen baru

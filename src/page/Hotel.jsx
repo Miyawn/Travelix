@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
 import bgImage from "../assets/bg1.jpg";

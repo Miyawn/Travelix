@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Calendar, MapPin, User, Search, Activity as LoadingIcon } from "lucide-react";
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
 import bgImage from "../assets/bg1.jpg";
 

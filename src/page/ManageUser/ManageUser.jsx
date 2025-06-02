@@ -1,319 +1,292 @@
 // src/pages/AdminDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
+import { useNavigate } from 'react-router-dom'; // useNavigate digunakan di useEffect
 import { toast } from 'react-hot-toast';
-import AdminSidebar from '../../components/AdminSidebar';
-import Navbar from '../../components/Navbar';            // Tetap butuh navbar
+
+import AdminSidebar from '../../components/Admin/AdminSidebar'; // Pastikan path ini sesuai dengan struktur folder Anda
+import AdminTopBar from '../../components/Admin/AdminTopBar';   // Sesuaikan path jika perlu
 
 // Firebase imports
 import { auth, db } from '../../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore'; // Import deleteDoc, updateDoc
+import { collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
 
-// Modals (akan diimplementasikan di Bagian 2)
-// import AddUserModal from '../components/AddUserModal';
-// import EditUserModal from '../components/EditUserModal';
+// Lucide React Icons untuk tabel pengguna
+import {
+  SlidersHorizontal,
+  Search,
+  UserPlus,
+  Eye,
+  FileEdit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown
+} from 'lucide-react';
+
+// Sample data jika fetchAllUsers belum mengembalikan data atau untuk dev
+const initialSampleUsers = [
+  { uid: '1', id: '1', name: 'M. Taufiqurrahman', email: 'taufiq@example.com', telp: '081649036295', balance: 10000000, role: 'admin' },
+  { uid: '2', id: '2', name: 'Tengku Rayhan Asemble', email: 'rayhan@example.com', telp: '0811221044', balance: 10000000, role: 'user' },
+  { uid: '3', id: '3', name: 'Izzi Albasith', email: 'izzi@example.com', telp: '0811221044', balance: 10000000, role: 'partner' },
+  { uid: '4', id: '4', name: 'User Keempat', email: 'user4@example.com', telp: '08123456789', balance: 5000000, role: 'user' },
+];
+
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const location = useLocation(); // Untuk highlight sidebar
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [users, setUsers] = useState([]); // Ini akan menjadi data untuk tabel pengguna
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminName, setAdminName] = useState("admin"); // Untuk ditampilkan di TopBar
 
-  // State untuk fungsi tabel: search, sort, pagination
+  // State untuk fungsi tabel: search, sort, pagination (tetap di sini jika tabel pengguna adalah konten utama dashboard ini)
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState(null);
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
+  const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10; // Sesuai gambar
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // State untuk modals (akan diimplementasikan di Bagian 2)
+  // State untuk modals (tetap di sini)
+  // eslint-disable-next-line no-unused-vars
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [userToEdit, setUserToEdit] = useState(null);
 
-  // --- Otorisasi Admin: Cek role pengguna saat memuat halaman ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
           const userDocRef = doc(db, "users", user.uid);
           const userDocSnap = await getDoc(userDocRef);
-
-          if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-            setIsAdmin(true);
-            fetchAllUsers(); // Jika admin, ambil semua pengguna
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.role === 'admin') {
+              setIsAdmin(true);
+              setAdminName(userData.name || "Admin"); // Ambil nama admin jika ada
+              fetchAllUsers(); // Memuat data pengguna karena ini halaman utama admin
+            } else {
+              toast.error("Anda tidak memiliki akses admin.", { position: "top-center" });
+              navigate("/");
+            }
           } else {
-            toast.error("Anda tidak memiliki akses admin.", { position: "top-center" });
-            navigate("/");
+            // User auth ada tapi tidak ada dokumen di Firestore collection 'users'
+            toast.error("Data pengguna tidak ditemukan. Silakan hubungi support.", { position: "top-center" });
+            navigate("/login"); // Atau logout user: auth.signOut(); navigate("/login");
           }
         } catch (error) {
           console.error("Error checking admin role:", error);
           toast.error("Terjadi kesalahan saat otorisasi.", { position: "top-center" });
           navigate("/");
-        } finally {
-          setLoading(false);
         }
       } else {
         toast.error("Anda harus login untuk mengakses halaman ini.", { position: "top-center" });
-        navigate("/");
-        setLoading(false);
+        navigate("/login");
+        setPageLoading(false);
       }
     });
-
     return () => unsubscribe();
   }, [navigate]);
 
-  // --- Ambil semua pengguna dari Firestore ---
   const fetchAllUsers = async () => {
+    // Tidak perlu setPageLoading(true) di sini karena sudah dihandle oleh useEffect utama
     try {
-      setLoading(true);
       const usersCollectionRef = collection(db, "users");
       const querySnapshot = await getDocs(usersCollectionRef);
-      
-      const fetchedUsers = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        balance: doc.data().balance || 0, // Default ke 0 jika tidak ada
+      const fetchedUsers = querySnapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        uid: docSnap.id,
+        ...docSnap.data(),
+        balance: docSnap.data().balance || 0,
       }));
-      setUsers(fetchedUsers);
+      setUsers(fetchedUsers.length > 0 ? fetchedUsers : initialSampleUsers); // Fallback jika fetch kosong
     } catch (error) {
       console.error("Error fetching all users:", error);
       toast.error("Gagal memuat data pengguna.", { position: "top-center" });
+      setUsers(initialSampleUsers); // Fallback jika error
     } finally {
-      setLoading(false);
+      setPageLoading(false); // Set loading false setelah selesai fetch atau error
     }
   };
 
-  // --- Logika Tabel: Filter, Sort, Pagination ---
-
-  // Filter users based on search term
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || // Gunakan optional chaining
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.telp?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.id?.toLowerCase().includes(searchTerm.toLowerCase())
+  // --- Logika Tabel: Filter, Sort, Pagination (tetap sama) ---
+   const filteredUsers = users.filter(user =>
+    (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.telp || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.role || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.id || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Sort users
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (!sortBy) return 0;
-
     const aValue = a[sortBy];
     const bValue = b[sortBy];
-
-    // Handle null/undefined values for comparison gracefully
     if (aValue === undefined || aValue === null) return sortOrder === 'asc' ? 1 : -1;
     if (bValue === undefined || bValue === null) return sortOrder === 'asc' ? -1 : 1;
-
-
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    }
-    // For numbers (like balance or ID if numeric)
-    return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    if (typeof aValue === 'number' && typeof bValue === 'number') return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    if (typeof aValue === 'string' && typeof bValue === 'string') return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    return 0;
   });
 
-  // Pagination logic
   const totalPages = Math.ceil(sortedUsers.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const currentRows = sortedUsers.slice(
-    startIndex,
-    startIndex + rowsPerPage
-  );
+  const currentRows = sortedUsers.slice(startIndex, startIndex + rowsPerPage);
 
   const handleSort = (column) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
+    if (sortBy === column) setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(column); setSortOrder('asc'); }
+    setCurrentPage(1);
   };
 
   const getSortIndicator = (column) => {
-    if (sortBy === column) {
-      return sortOrder === 'asc' ? ' ▲' : ' ▼';
-    }
-    return '';
+    if (sortBy === column) return sortOrder === 'asc' ? <ArrowUpDown size={14} className="inline ml-1 opacity-70 transform rotate-180" /> : <ArrowUpDown size={14} className="inline ml-1 opacity-70" />;
+    return <ArrowUpDown size={14} className="inline ml-1 opacity-30" />;
   };
-
-  useEffect(() => {
-    // Reset page to 1 when search term or sort changes
-    setCurrentPage(1);
-  }, [searchTerm, sortBy, sortOrder]);
-
-
-  // --- Fungsi CRUD (Placeholder untuk Bagian 2) ---
-
-  const handleAddUserClick = () => {
-    setIsAddModalOpen(true); // Buka modal Add User
-    toast.info("Fungsi 'Tambah Pengguna' akan diimplementasikan di Bagian 2.");
-  };
-
-  const handleEditUserClick = (user) => {
-    setUserToEdit(user);
-    setIsEditModalOpen(true); // Buka modal Edit User
-    toast.info(`Fungsi 'Edit Pengguna' untuk ${user.name} akan diimplementasikan di Bagian 2.`);
-  };
-
-  const handleDeleteUserClick = async (userId) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus pengguna ini? Ini tidak dapat dibatalkan!")) {
-      try {
-        setLoading(true);
-        // Hapus dari Firestore
-        await deleteDoc(doc(db, "users", userId));
-        
-        // Catatan: Menghapus user dari Firebase Authentication dari frontend
-        // hanya bisa dilakukan untuk user yang sedang login.
-        // Untuk menghapus user lain, Anda perlu menggunakan Firebase Cloud Functions
-        // dengan Firebase Admin SDK.
-        // Contoh placeholder untuk Cloud Function call:
-        // await fetch('YOUR_CLOUD_FUNCTION_ENDPOINT_TO_DELETE_AUTH_USER', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ uid: userId })
-        // });
-
-        toast.success("Pengguna berhasil dihapus!");
-        fetchAllUsers(); // Refresh daftar pengguna
-      } catch (error) {
-        console.error("Error menghapus pengguna:", error);
-        toast.error("Gagal menghapus pengguna. Periksa konsol untuk detail.");
-      } finally {
-        setLoading(false);
+  
+  const handleAddUserClick = () => { setIsAddModalOpen(true); /* Implementasi modal */ };
+  const handleEditUserClick = (user) => { setUserToEdit(user); setIsEditModalOpen(true); /* Implementasi modal */ };
+  const handleDeleteUserClick = async (userIdToDelete) => { /* ... (logika hapus) ... */ 
+      if (window.confirm("Yakin hapus user?")) {
+        console.log("Hapus user:", userIdToDelete);
+        toast.success("Fungsi hapus belum diimplementasikan sepenuhnya.");
       }
-    }
   };
 
-
-  if (loading) {
+  // Tampilan loading utama jika data belum siap atau belum terotentikasi sebagai admin
+  if (pageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-700 text-lg">Memuat Dashboard Admin...</p>
+      <div className="flex h-screen bg-base-200 items-center justify-center">
+        {/* Bisa tambahkan AdminSidebar di sini jika diinginkan tampil saat loading */}
+        {/* <AdminSidebar /> */}
+        <span className="loading loading-lg loading-spinner text-primary"></span>
       </div>
     );
   }
 
+  // Jika sudah tidak loading dan bukan admin (seharusnya sudah diredirect oleh useEffect)
   if (!isAdmin) {
-    return null; // Pengguna akan diredirect oleh useEffect jika bukan admin
+    return null; 
   }
 
+  // Jika admin dan data sudah dimuat (atau fallback ke sample)
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Navbar />
-      <AdminSidebar />
+    <div className="flex h-screen bg-base-200 font-montserrat"> {/* Gunakan font dari gambar jika perlu */}
+      <AdminSidebar /> {/* Sidebar di sisi kiri */}
       
-      <div className="flex-1 ml-64 p-8 pt-20"> {/* ml-64 untuk memberi ruang sidebar */}
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Welcome! admin</h1>
+      <div className="flex-1 flex flex-col overflow-hidden"> {/* Konten utama di kanan */}
+        {/* 2. Panggil AdminTopBar di sini */}
+        <div className="sticky top-0 z-40"> {/* Wrapper untuk membuat top bar sticky */}
+            <AdminTopBar adminName={adminName} welcomeText="Welcome!" />
+        </div>
         
-        {/* Konten Tabel Pengguna (yang sebelumnya di UserTable.jsx) */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Search anything..."
-                className="input input-bordered w-full max-w-xs text-black"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button onClick={() => handleSort(sortBy || 'id')} className="btn btn-ghost ml-2 text-black">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM4 10a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zM4 16a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" /></svg>
-                Sort
+        {/* Konten spesifik halaman (Tabel Pengguna, dll.) */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          {/* Baris Aksi: Sort, Search, Add User */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button className="btn btn-outline btn-sm normal-case font-normal text-base-content border-base-300">
+                <SlidersHorizontal size={16} className="mr-2" /> Sort
               </button>
+              <div className="relative w-full max-w-xs sm:max-w-sm flex-1"> {/* Atau sesuaikan lebar jika perlu */}
+  
+                {/* Wrapper untuk ikon, diposisikan absolut di dalam input */}
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={16} className="opacity-100 text-black" />
+                </div>
+
+                {/* Input field dengan padding kiri untuk memberi ruang bagi ikon */}
+                <input
+                  type="text"
+                  placeholder="Search anything..."
+                  // Kelas DaisyUI input tetap digunakan, tambahkan pl-10 untuk padding kiri
+                  className="input input-bordered input-sm w-full pl-10 pr-4 focus:border-primary focus:ring-0" 
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1);}}
+                />
+              </div>
             </div>
-            <button onClick={handleAddUserClick} className="btn btn-primary bg-yellow-500 hover:bg-yellow-600 text-black">
-              + Add User
+            <button onClick={handleAddUserClick} className="btn btn-neutral btn-sm normal-case font-medium w-full sm:w-auto">
+              <UserPlus size={16} className="mr-2" /> Add User
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table w-full text-black">
+          {/* Tabel Pengguna */}
+          <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+            <table className="table w-full text-sm">
               <thead>
-                <tr>
-                  <th className="cursor-pointer" onClick={() => handleSort('id')}>ID {getSortIndicator('id')}</th>
-                  <th className="cursor-pointer" onClick={() => handleSort('name')}>NAME {getSortIndicator('name')}</th>
-                  <th className="cursor-pointer" onClick={() => handleSort('email')}>EMAIL {getSortIndicator('email')}</th>
-                  <th className="cursor-pointer" onClick={() => handleSort('telp')}>PHONE {getSortIndicator('telp')}</th>
-                  <th className="cursor-pointer" onClick={() => handleSort('balance')}>BALANCE {getSortIndicator('balance')}</th>
-                  <th className="cursor-pointer" onClick={() => handleSort('role')}>ROLE {getSortIndicator('role')}</th>
-                  <th>ACTION</th>
+                <tr className="text-xs text-base-content/70 uppercase">
+                  {['id', 'name', 'email', 'telp', 'balance', 'role'].map((col) => (
+                    <th key={col} className="cursor-pointer select-none whitespace-nowrap hover:bg-base-200/60" onClick={() => handleSort(col)}>
+                      {col} {getSortIndicator(col)}
+                    </th>
+                  ))}
+                  <th className="text-center select-none whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {currentRows.length > 0 ? (
-                  currentRows.map((user, index) => (
-                    <tr key={user.id || index}>
-                      <td>{user.id ? user.id.substring(0, 5) + '...' : ''}</td>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.telp}</td>
-                      <td>{user.balance ? `Rp. ${user.balance.toLocaleString('id-ID')}` : 'Rp. 0'}</td>
-                      <td className="capitalize">{user.role}</td>
-                      <td>
-                        <button onClick={() => handleEditUserClick(user)} className="btn btn-sm btn-info text-white mr-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L15.232 5.232z" /></svg>
-                        </button>
-                        <button onClick={() => handleDeleteUserClick(user.id)} className="btn btn-sm btn-error text-white">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="text-center py-4">No users found.</td>
+                {currentRows.map((user, index) => (
+                  <tr key={user.uid || index} className="hover">
+                    <td className="text-base-content/80">{(startIndex + index + 1).toString().padStart(users.length.toString().length, '0')}</td>
+                    <td className="font-medium text-base-content">{user.name}</td>
+                    <td className="text-base-content/80">{user.email}</td>
+                    <td className="text-base-content/80">{user.telp}</td>
+                    <td className="text-base-content/80">{user.balance ? `Rp. ${Number(user.balance).toLocaleString('id-ID')}` : 'Rp. 0'}</td>
+                    <td>
+                      <span className={`badge badge-sm ${
+                        user.role === 'admin' ? 'badge-primary' :
+                        user.role === 'user' ? 'badge-info badge-outline' :
+                        'badge-warning badge-outline'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="text-center whitespace-nowrap">
+                      <button title="View" className="btn btn-ghost btn-xs text-info"> <Eye size={16} /> </button>
+                      <button title="Edit" onClick={() => handleEditUserClick(user)} className="btn btn-ghost btn-xs text-warning"> <FileEdit size={16} /> </button>
+                      <button title="Delete" onClick={() => handleDeleteUserClick(user.uid)} className="btn btn-ghost btn-xs text-error"> <Trash2 size={16} /> </button>
+                    </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
+          
+          {currentRows.length === 0 && !pageLoading && (
+             <p className="text-center text-base-content/70 mt-6">
+               {searchTerm ? "Tidak ada pengguna yang cocok." : "Tidak ada data pengguna."}
+             </p>
+          )}
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-4">
-            <div>
-              Rows per page:
-              <select
-                className="select select-bordered select-sm ml-2 text-black"
+          {/* Kontrol Pagination */}
+          {/* <div className="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-base-content/80">
+            <div className="flex items-center gap-2 mb-2 sm:mb-0">
+              <span>Rows per page</span>
+              <select 
+                className="select select-bordered select-xs"
                 value={rowsPerPage}
-                onChange={(e) => { /* Logic to change rowsPerPage */ }}
-                disabled /* Disabled for now as rowsPerPage is fixed */
+                onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
               >
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
+                <option value={10}>10</option><option value={3}>3</option><option value={5}>5</option><option value={20}>20</option>
               </select>
             </div>
-            <div className="flex items-center">
-              <span className="mr-4">
-                {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredUsers.length)} of {filteredUsers.length}
-              </span>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-              </button>
+            <div className="flex items-center gap-2">
+              <span>{`${filteredUsers.length > 0 ? startIndex + 1 : 0}-${Math.min(indexOfLastUser, filteredUsers.length)} of ${filteredUsers.length}`}</span>
+              <div className="join">
+                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} className="join-item btn btn-sm btn-outline" disabled={currentPage === 1}>
+                  <ChevronLeft size={18} />
+                </button>
+                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} className="join-item btn btn-sm btn-outline" disabled={currentPage === totalPages || totalPages === 0}>
+                  <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-
+          </div> */}
+        </main>
       </div>
-
-      {/* Modals (akan diimplementasikan di Bagian 2) */}
-      {/* {isAddModalOpen && <AddUserModal onClose={() => setIsAddModalOpen(false)} onUserAdded={fetchAllUsers} />} */}
-      {/* {isEditModalOpen && <EditUserModal user={userToEdit} onClose={() => setIsEditModalOpen(false)} onUserUpdated={fetchAllUsers} />} */}
+      {/* Modals di sini jika perlu */}
     </div>
   );
 }

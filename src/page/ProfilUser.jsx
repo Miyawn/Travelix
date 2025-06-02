@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import Navbar from "../components/navbar"; // Pastikan path ini benar
+import Navbar from "../components/Navbar"; // Pastikan path ini benar
 import Footer from "../components/footer"; // Pastikan path ini benar
 
 // Import Firebase Auth dan Firestore
