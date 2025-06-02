@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Eye, EyeOff, Activity } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { auth } from "../firebaseConfig"; // Sesuaikan path jika berbeda
-import { createUserWithEmailAndPassword } from "firebase/auth"; // Import fungsi yang diperlukan
+import { auth, db } from "../firebaseConfig"; // Import auth DAN db
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore"; // Import fungsi Firestore yang diperlukan
 
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // State untuk loading button
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     nama: "",
     email: "",
@@ -22,17 +23,17 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading ke true saat submit
+    setLoading(true);
 
-    // Validasi dasar (nama, email, telp, password tidak boleh kosong)
+    // Validasi dasar
     if (!form.nama || !form.email || !form.telp || !form.password) {
-      setLoading(false); // Matikan loading jika validasi gagal
+      setLoading(false);
       return toast.error("Semua field wajib diisi!", {
         position: "top-center",
       });
     }
 
-    // Validasi tambahan untuk password (Firebase memiliki persyaratan minimum 6 karakter)
+    // Validasi password
     if (form.password.length < 6) {
       setLoading(false);
       return toast.error("Password minimal 6 karakter!", {
@@ -41,7 +42,7 @@ export default function Register() {
     }
 
     try {
-      // Menggunakan Firebase Authentication untuk membuat pengguna baru
+      // 1. Buat pengguna baru dengan Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
@@ -49,19 +50,19 @@ export default function Register() {
       );
 
       const user = userCredential.user;
-      console.log("Pengguna berhasil didaftarkan:", user);
+      console.log("Pengguna berhasil didaftarkan di Auth:", user);
 
-      // Anda bisa menambahkan data pengguna tambahan (nama, telp) ke Firestore
-      // atau database lain di sini setelah user terdaftar di Auth.
-      // Contoh:
-      // import { db } from "../firebase"; // Jika Anda mengekspor db (Firestore)
-      // import { doc, setDoc } from "firebase/firestore";
-      // await setDoc(doc(db, "users", user.uid), {
-      //   nama: form.nama,
-      //   email: form.email,
-      //   telp: form.telp,
-      //   createdAt: new Date(),
-      // });
+      // 2. Simpan data pengguna tambahan ke Firestore
+      // Gunakan user.uid sebagai ID dokumen agar mudah dihubungkan dengan Authentication
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid, // Simpan UID juga di dokumen
+        nama: form.nama,
+        email: form.email,
+        telp: form.telp,
+        createdAt: new Date(), // Tambahkan timestamp
+      });
+
+      console.log("Data pengguna berhasil disimpan di Firestore.");
 
       toast.success("Berhasil daftar!", {
         position: "top-center",
@@ -73,7 +74,6 @@ export default function Register() {
       console.error("Error saat daftar:", error);
       let errorMessage = "Terjadi kesalahan saat pendaftaran!";
 
-      // Menangani error dari Firebase
       switch (error.code) {
         case "auth/email-already-in-use":
           errorMessage = "Email sudah terdaftar!";
@@ -85,14 +85,14 @@ export default function Register() {
           errorMessage = "Password terlalu lemah (minimal 6 karakter)!";
           break;
         default:
-          errorMessage = error.message; // Tampilkan pesan error umum dari Firebase
+          errorMessage = error.message;
       }
 
       toast.error(errorMessage, {
         position: "top-center",
       });
     } finally {
-      setLoading(false); // Selalu matikan loading setelah proses selesai
+      setLoading(false);
     }
   };
 
@@ -175,7 +175,7 @@ export default function Register() {
         <button
           type="submit"
           className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded w-full transition duration-200 flex items-center justify-center gap-2"
-          disabled={loading} // Nonaktifkan tombol saat loading
+          disabled={loading}
         >
           {loading ? (
             <Activity size={15} className="animate-spin" />
