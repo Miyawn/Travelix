@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Eye, EyeOff, Activity } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { auth } from "../firebaseConfig"; // Sesuaikan path jika berbeda
+import { createUserWithEmailAndPassword } from "firebase/auth"; // Import fungsi yang diperlukan
 
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // State untuk loading button
   const [form, setForm] = useState({
     nama: "",
     email: "",
@@ -19,29 +22,46 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading ke true saat submit
 
-    // Validasi
+    // Validasi dasar (nama, email, telp, password tidak boleh kosong)
     if (!form.nama || !form.email || !form.telp || !form.password) {
+      setLoading(false); // Matikan loading jika validasi gagal
       return toast.error("Semua field wajib diisi!", {
         position: "top-center",
       });
     }
 
-    try {
-      const response = await fetch("http://localhost:4000/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+    // Validasi tambahan untuk password (Firebase memiliki persyaratan minimum 6 karakter)
+    if (form.password.length < 6) {
+      setLoading(false);
+      return toast.error("Password minimal 6 karakter!", {
+        position: "top-center",
       });
+    }
 
-      if (!response.ok) {
-        const err = await response.json();
-        return toast.error(err.message || "Gagal daftar!", {
-          position: "top-center",
-        });
-      }
+    try {
+      // Menggunakan Firebase Authentication untuk membuat pengguna baru
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+
+      const user = userCredential.user;
+      console.log("Pengguna berhasil didaftarkan:", user);
+
+      // Anda bisa menambahkan data pengguna tambahan (nama, telp) ke Firestore
+      // atau database lain di sini setelah user terdaftar di Auth.
+      // Contoh:
+      // import { db } from "../firebase"; // Jika Anda mengekspor db (Firestore)
+      // import { doc, setDoc } from "firebase/firestore";
+      // await setDoc(doc(db, "users", user.uid), {
+      //   nama: form.nama,
+      //   email: form.email,
+      //   telp: form.telp,
+      //   createdAt: new Date(),
+      // });
 
       toast.success("Berhasil daftar!", {
         position: "top-center",
@@ -51,9 +71,28 @@ export default function Register() {
       navigate("/");
     } catch (error) {
       console.error("Error saat daftar:", error);
-      toast.error("Terjadi kesalahan!", {
+      let errorMessage = "Terjadi kesalahan saat pendaftaran!";
+
+      // Menangani error dari Firebase
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          errorMessage = "Email sudah terdaftar!";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Format email tidak valid!";
+          break;
+        case "auth/weak-password":
+          errorMessage = "Password terlalu lemah (minimal 6 karakter)!";
+          break;
+        default:
+          errorMessage = error.message; // Tampilkan pesan error umum dari Firebase
+      }
+
+      toast.error(errorMessage, {
         position: "top-center",
       });
+    } finally {
+      setLoading(false); // Selalu matikan loading setelah proses selesai
     }
   };
 
@@ -136,9 +175,14 @@ export default function Register() {
         <button
           type="submit"
           className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded w-full transition duration-200 flex items-center justify-center gap-2"
+          disabled={loading} // Nonaktifkan tombol saat loading
         >
-          <Activity size={15} />
-          Daftar
+          {loading ? (
+            <Activity size={15} className="animate-spin" />
+          ) : (
+            <Activity size={15} />
+          )}
+          {loading ? "Mendaftar..." : "Daftar"}
         </button>
 
         {/* Link ke Login */}
