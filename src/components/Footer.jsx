@@ -17,7 +17,6 @@ function Footer() {
           <a href="/" className="transition hover:text-yellow-400">Home</a>
           <a href="/hotel" className="transition hover:text-yellow-400">Hotel</a>
           <a href="/flights" className="transition hover:text-yellow-400">Pesawat</a>
-          <a href="/about" className="transition hover:text-yellow-400">About</a>
         </div>
       </nav>
     </footer>
