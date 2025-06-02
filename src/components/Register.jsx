@@ -2,10 +2,14 @@ import { useState } from "react";
 import { Eye, EyeOff, Activity } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { auth, db } from "../firebaseConfig"; // Import auth DAN db
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore"; // Import fungsi Firestore yang diperlukan
 
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     nama: "",
     email: "",
@@ -19,29 +23,46 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Validasi
+    // Validasi dasar
     if (!form.nama || !form.email || !form.telp || !form.password) {
+      setLoading(false);
       return toast.error("Semua field wajib diisi!", {
         position: "top-center",
       });
     }
 
+    // Validasi password
+    if (form.password.length < 6) {
+      setLoading(false);
+      return toast.error("Password minimal 6 karakter!", {
+        position: "top-center",
+      });
+    }
+
     try {
-      const response = await fetch("http://localhost:4000/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+      // 1. Buat pengguna baru dengan Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
+
+      const user = userCredential.user;
+      console.log("Pengguna berhasil didaftarkan di Auth:", user);
+
+      // 2. Simpan data pengguna tambahan ke Firestore
+      // Gunakan user.uid sebagai ID dokumen agar mudah dihubungkan dengan Authentication
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid, // Simpan UID juga di dokumen
+        nama: form.nama,
+        email: form.email,
+        telp: form.telp,
+        createdAt: new Date(), // Tambahkan timestamp
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        return toast.error(err.message || "Gagal daftar!", {
-          position: "top-center",
-        });
-      }
+      console.log("Data pengguna berhasil disimpan di Firestore.");
 
       toast.success("Berhasil daftar!", {
         position: "top-center",
@@ -51,9 +72,27 @@ export default function Register() {
       navigate("/");
     } catch (error) {
       console.error("Error saat daftar:", error);
-      toast.error("Terjadi kesalahan!", {
+      let errorMessage = "Terjadi kesalahan saat pendaftaran!";
+
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          errorMessage = "Email sudah terdaftar!";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Format email tidak valid!";
+          break;
+        case "auth/weak-password":
+          errorMessage = "Password terlalu lemah (minimal 6 karakter)!";
+          break;
+        default:
+          errorMessage = error.message;
+      }
+
+      toast.error(errorMessage, {
         position: "top-center",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,9 +175,14 @@ export default function Register() {
         <button
           type="submit"
           className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded w-full transition duration-200 flex items-center justify-center gap-2"
+          disabled={loading}
         >
-          <Activity size={15} />
-          Daftar
+          {loading ? (
+            <Activity size={15} className="animate-spin" />
+          ) : (
+            <Activity size={15} />
+          )}
+          {loading ? "Mendaftar..." : "Daftar"}
         </button>
 
         {/* Link ke Login */}

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+// Import auth dari file konfigurasi Firebase Anda
+import { auth } from "../firebaseConfig"; // Sesuaikan path jika berbeda
+import { signInWithEmailAndPassword } from "firebase/auth"; // Import fungsi yang diperlukan
 
 export default function LoginModal({
   isOpen,
@@ -10,14 +13,18 @@ export default function LoginModal({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // State untuk loading button
   const navigate = useNavigate();
 
   if (!isOpen) return null;
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => { // Tambahkan async di sini
     e.preventDefault();
+    setLoading(true); // Set loading ke true saat submit
 
+    // Validasi input
     if (!email.trim()) {
+      setLoading(false);
       return toast.error("Email tidak boleh kosong", {
         duration: 4000,
         position: "top-center",
@@ -25,17 +32,60 @@ export default function LoginModal({
     }
 
     if (!password.trim()) {
+      setLoading(false);
       return toast.error("Password tidak boleh kosong", {
         duration: 4000,
         position: "top-center",
       });
     }
 
-    toast.success("Berhasil login!", {
-      position: "top-center",
-    });
-    onLoginSuccess();
-    onClose();
+    try {
+      // Menggunakan Firebase Authentication untuk login pengguna
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredential.user;
+      console.log("Pengguna berhasil login:", user);
+
+      toast.success("Berhasil login!", {
+        position: "top-center",
+      });
+
+      // Panggil callback onLoginSuccess yang diberikan oleh parent
+      onLoginSuccess();
+      onClose(); // Tutup modal setelah login berhasil
+    } catch (error) {
+      console.error("Error saat login:", error);
+      let errorMessage = "Terjadi kesalahan saat login!";
+
+      // Menangani error dari Firebase
+      switch (error.code) {
+        case "auth/invalid-email":
+          errorMessage = "Format email tidak valid!";
+          break;
+        case "auth/user-disabled":
+          errorMessage = "Akun Anda telah dinonaktifkan.";
+          break;
+        case "auth/user-not-found":
+        case "auth/wrong-password": // Firebase menggabungkan ini untuk keamanan
+          errorMessage = "Email atau password salah!";
+          break;
+        case "auth/invalid-credential": // Untuk versi Firebase SDK yang lebih baru
+          errorMessage = "Email atau password salah!";
+          break;
+        default:
+          errorMessage = error.message; // Tampilkan pesan error umum dari Firebase
+      }
+
+      toast.error(errorMessage, {
+        position: "top-center",
+      });
+    } finally {
+      setLoading(false); // Selalu matikan loading setelah proses selesai
+    }
   };
 
   const handleOpenRegister = () => {
@@ -109,9 +159,13 @@ export default function LoginModal({
 
           <button
             type="submit"
-            className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded w-full transition duration-200"
+            className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded w-full transition duration-200 flex items-center justify-center gap-2"
+            disabled={loading} // Nonaktifkan tombol saat loading
           >
-            Masuk
+            {loading ? (
+              <svg className="animate-spin h-4 w-4 mr-2 border-b-2 border-black rounded-full" viewBox="0 0 24 24"></svg>
+            ) : null}
+            {loading ? "Masuk..." : "Masuk"}
           </button>
 
           <div className="mt-4 text-center text-sm text-gray-700">
