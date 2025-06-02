@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   MapPin,
   ArrowRight,
@@ -8,7 +9,8 @@ import {
   Clock,
   Banknote,
 } from "lucide-react";
-import pesawatImg from "../assets/pesawat.jpg"; // Pastikan path ini sesuai dengan struktur folder Anda
+import pesawatImg from "../assets/pesawat.jpg";
+import {Seat} from "@phosphor-icons/react";
 
 function CardPenerbangan({
   title,
@@ -21,6 +23,12 @@ function CardPenerbangan({
   sisaKursi,
   harga,
 }) {
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/flightsdetails"); // pastikan path sama dengan route di App.jsx
+  };
+
   return (
     <div className="card bg-white shadow-xl">
       <figure>
@@ -46,7 +54,7 @@ function CardPenerbangan({
         </div>
 
         <div className="flex items-center gap-4">
-          <Users className="w-5 h-5" />
+          <Seat className="w-5 h-5" />
           <span>{sisaKursi}</span>
           <Clock className="w-5 h-5 ml-4" />
           <span>Last check-in: {lastCheckin}</span>
@@ -58,7 +66,9 @@ function CardPenerbangan({
         </div>
 
         <div className="card-actions justify-end mt-4">
-          <button className="btn btn-warning w-full">Book Sekarang</button>
+          <button onClick={handleBookNow} className="btn btn-warning w-full">
+            Book Sekarang
+          </button>
         </div>
       </div>
     </div>
