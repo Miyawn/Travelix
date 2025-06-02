@@ -1,31 +1,39 @@
+// src/pages/FlightReceipts.jsx (atau nama file yang Anda gunakan)
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
+import FlightReceiptCard from "../components/BookingFlightConfirmationCard"; // 1. Impor komponen baru
 
-function Flights() {
+function FlightReceipts() { // Ganti nama fungsi agar sesuai
   const navigate = useNavigate();
 
+  // Data ini idealnya datang dari proses booking sebelumnya (misalnya via state, context, atau URL params)
+  // Anda bisa meneruskannya sebagai prop 'details' ke FlightReceiptCard jika perlu.
+  const flightBookingDataFromParent = {
+    orderId: "PSWT-ABCDE12345",
+    airlineName: "Lion Air",
+    departureAirport: "Soekarno-Hatta (CGK), Jakarta",
+    departureTime: "Rabu, 4 Juni 2025, 08:00 WIB",
+    arrivalAirport: "SAMS Sepinggan (BPN), Balikpapan",
+    arrivalTime: "Rabu, 4 Juni 2025, 11:10 WITA",
+    seatNumber: "25C",
+    price: "Rp. 980.000",
+  };
+
   return (
-    <div className="min-h-screen bg-white flex flex-col pt-16">
+    <div className="min-h-screen bg-gray-100 flex flex-col pt-16"> {/* Latar abu-abu untuk kontras */}
       <Navbar />
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center p-8">
-      
-          <h1 className="text-2xl font-bold mb-4">Penerbangan</h1>
-          <p className="text-gray-600 mb-6">
-            Halaman ini akan menampilkan informasi penerbangan.
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-300 transition"
-          >
-            Kembali ke Beranda
-          </button>
-        </div>
-      </div>
+      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+        
+        {/* 2. Gunakan komponen FlightReceiptCard di sini */}
+        {/* Jika FlightReceiptCard menerima props: */}
+        <FlightReceiptCard details={flightBookingDataFromParent} /> 
+        {/* Jika tidak, dan FlightReceiptCard menggunakan data default internalnya: */}
+        {/* <FlightReceiptCard /> */}
+      </main>
       <Footer />
     </div>
   );
 }
 
-export default Flights;
+export default FlightReceipts; // Ganti nama export default

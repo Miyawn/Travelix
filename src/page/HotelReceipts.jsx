@@ -32,13 +32,6 @@ function HotelReceipts() {
         <BookingConfirmationCard /> 
         {/* Contoh jika BookingConfirmationCard menerima props: */}
         {/* <BookingConfirmationCard details={bookingDataFromParent} /> */}
-
-        <button
-          onClick={() => navigate("/")} // Arahkan ke halaman utama atau halaman riwayat pesanan
-          className="mt-8 px-6 py-3 btn btn-outline border-gray-300 hover:bg-gray-200 text-gray-700"
-        >
-          Kembali ke Beranda
-        </button>
       </main>
       <Footer />
     </div>

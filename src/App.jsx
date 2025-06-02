@@ -10,6 +10,7 @@ import HotelReceipts from "./page/HotelReceipts";
 import { Toaster } from "react-hot-toast";
 import Profile from "./page/ProfilUser";
 import ManageUser from "./page/ManageUser/ManageUser";
+import FlightReceipts from "./page/FlightsReceipts";
 
 function App() {
   return (
@@ -25,7 +26,8 @@ function App() {
         <Route path="/hotelreceipts" element={<HotelReceipts />} />
         <Route path="/flightsdetails" element={<FlightDetails />} /> 
         <Route path="/profiluser" element={<Profile />} /> 
-        <Route path="/manageuser" element={<ManageUser />} /> 
+        <Route path="/manageuser" element={<ManageUser />} />
+        <Route path="/flightsreceipts" element={<FlightReceipts />} />
       </Routes>
     </BrowserRouter>
   );
