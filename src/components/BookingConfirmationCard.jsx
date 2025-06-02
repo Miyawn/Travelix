@@ -3,8 +3,9 @@ import React from 'react';
 import { CheckCircle } from 'lucide-react'; // Menggunakan ikon dari lucide-react
 
 // Data contoh untuk ditampilkan, idealnya ini dari props atau state
-const bookingDetails = {
-  orderId: "081649036295", // Contoh, ganti dengan data dinamis
+// Saya akan menggunakan defaultBookingDetails jika props `details` tidak diberikan
+const defaultBookingDetails = {
+  orderId: "081649036295",
   hotelName: "Hotel Gunung Bakaran",
   roomName: "Deluxe Room",
   roomType: "Premium",
@@ -14,7 +15,9 @@ const bookingDetails = {
   price: "Rp. 1.600.000",
 };
 
-export default function BookingConfirmationCard() {
+export default function BookingConfirmationCard({ details }) {
+  const bookingDetails = details || defaultBookingDetails;
+
   const detailsToDisplay = [
     { label: "ID Pesanan:", value: bookingDetails.orderId },
     { label: "Nama Hotel:", value: bookingDetails.hotelName },
@@ -31,18 +34,21 @@ export default function BookingConfirmationCard() {
       <div className="text-center mb-6 md:mb-8">
         <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-green-500 mx-auto mb-4" strokeWidth={1.5} />
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-          Selamat! Pesanan Reservasi Kamar Hotel Sukses!
+          Selamat! <br /> Pesanan Reservasi Kamar Hotel Sukses!
         </h2>
         <p className="text-gray-600 mt-2 text-sm md:text-base">
-          Terima kasih telah memesan kamar melalui Travelix.
+          Terima kasih telah memesan kamar melalui Travelix!
         </p>
       </div>
 
-      <div className="space-y-3 border-t border-b border-gray-200 py-6 mb-8">
+      {/* Detail Pesanan dengan nilai di bawah label */}
+      <div className="space-y-4 border-t border-b border-gray-200 py-6 mb-8"> {/* Sedikit menambah space-y */}
         {detailsToDisplay.map((item) => (
-          <div key={item.label} className="flex flex-col sm:flex-row justify-between text-sm">
-            <span className="font-medium text-gray-600 min-w-[120px] mb-1 sm:mb-0">{item.label}</span>
-            <span className={`${item.isPrice ? 'font-bold text-lg text-yellow-600' : 'text-gray-800'} text-left sm:text-right`}>
+          <div key={item.label} className="text-sm"> {/* Hapus flex dan justify-between dari sini */}
+            <span className="block font-medium text-gray-600">{item.label}</span> {/* `block` agar mengambil lebar penuh */}
+            <span 
+              className={`block mt-1 ${item.isPrice ? 'font-bold text-lg text-yellow-600' : 'text-gray-800'}`} // `block` dan `mt-1` untuk baris baru dan sedikit spasi
+            >
               {item.value}
             </span>
           </div>
