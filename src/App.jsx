@@ -5,7 +5,8 @@ import Home from "./page/Home";
 import Hotel from "./page/Hotel";
 import Flights from "./page/Flights";
 import HotelDetails from "./page/HotelDetails";
-import FlightDetails from "./page/FlightsDetails";  // import FlightDetails yang benar
+import FlightDetails from "./page/FlightsDetails"; 
+import HotelReceipts from "./page/HotelReceipts";
 import { Toaster } from "react-hot-toast";
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
         <Route path="/flights" element={<Flights />} />
         <Route path="/hotel" element={<Hotel />} />
         <Route path="/hoteldetails" element={<HotelDetails />} />
-        <Route path="/flightsdetails" element={<FlightDetails />} /> 
+        <Route path="/flightsdetails" element={<FlightDetails />} />
+        <Route path="/hotelreceipts" element={<HotelReceipts />} />
       </Routes>
     </BrowserRouter>
   );

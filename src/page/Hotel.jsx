@@ -83,7 +83,6 @@ export default function KamarHotel() {
               name={hotel.name}
               beds={hotel.beds}
               location={hotel.location}
-              onBook={() => alert("Booking diklik")}
             />
           ))}
         </div>
