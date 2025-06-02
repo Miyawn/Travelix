@@ -1,75 +1,42 @@
-import { useNavigate } from "react-router-dom";
-import {
-  MapPin,
-  ArrowRight,
-  PlaneTakeoff,
-  PlaneLanding,
-  Calendar,
-  Users,
-  Clock,
-  Banknote,
-} from "lucide-react";
-import pesawatImg from "../assets/pesawat.jpg";
-import {Seat} from "@phosphor-icons/react";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function CardPenerbangan({
-  title,
-  asal,
-  tujuan,
-  tanggal,
-  berangkat,
-  tiba,
-  lastCheckin,
-  sisaKursi,
-  harga,
-}) {
+// Asumsi ikon sudah di-import di sini jika diperlukan
+
+function CardPenerbangan({ id, title, asal, tujuan, tanggal, berangkat, tiba, harga, sisaKursi }) {
   const navigate = useNavigate();
 
-  const handleBookNow = () => {
-    navigate("/flightsdetails"); // pastikan path sama dengan route di App.jsx
+  const handleCardClick = () => {
+    // Navigasi ke halaman detail dengan ID penerbangan
+    navigate(`/flights/${id}`);
   };
 
   return (
-    <div className="card bg-white shadow-xl">
-      <figure>
-        <img src={pesawatImg} alt="Pesawat" className="w-full object-cover h-48" />
-      </figure>
-      <div className="card-body">
-        <h2 className="card-title">{title}</h2>
-
-        <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5" />
-          <span>{asal}</span>
-          <ArrowRight className="w-4 h-4" />
-          <span>{tujuan}</span>
+    // Bungkus seluruh kartu dalam button atau div dengan onClick
+    <div 
+      onClick={handleCardClick} 
+      className="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-between hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+    >
+      <div>
+        <h3 className="text-xl font-bold mb-2">{title}</h3>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-center">
+            <p className="text-sm text-gray-500">Asal</p>
+            <p className="font-semibold">{asal}</p>
+            <p className="text-lg font-bold">{berangkat}</p>
+          </div>
+          <div className="text-center text-gray-400">-</div>
+          <div className="text-center">
+            <p className="text-sm text-gray-500">Tujuan</p>
+            <p className="font-semibold">{tujuan}</p>
+            <p className="text-lg font-bold">{tiba}</p>
+          </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          <PlaneTakeoff className="w-5 h-5" />
-          <span>{berangkat}</span>
-          <PlaneLanding className="w-5 h-5 ml-4" />
-          <span>{tiba}</span>
-          <Calendar className="w-5 h-5 ml-4" />
-          <span>{tanggal}</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <Seat className="w-5 h-5" />
-          <span>{sisaKursi}</span>
-          <Clock className="w-5 h-5 ml-4" />
-          <span>Last check-in: {lastCheckin}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Banknote className="w-5 h-5" />
-          <span className="text-lg font-semibold">{harga}</span>
-        </div>
-
-        <div className="card-actions justify-end mt-4">
-          <button onClick={handleBookNow} className="btn btn-warning w-full">
-            Book Sekarang
-          </button>
-        </div>
+        <p className="text-sm text-gray-600 mb-1">Tanggal: {tanggal}</p>
+        <p className="text-sm text-gray-600">Sisa Kursi: {sisaKursi}</p>
+      </div>
+      <div className="mt-4 pt-4 border-t border-gray-200 text-right">
+        <p className="text-lg font-bold text-yellow-600">{harga}</p>
       </div>
     </div>
   );

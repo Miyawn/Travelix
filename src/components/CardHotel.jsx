@@ -1,6 +1,18 @@
 import { BedDouble, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // 1. Impor useNavigate
 
 export default function CardHotel({ image, name, beds, location, onBook }) {
+  const navigate = useNavigate(); // 2. Inisialisasi hook useNavigate
+
+  const handleBookClick = () => {
+    // 3. Jika ada prop onBook, panggil terlebih dahulu (opsional)
+    if (onBook) {
+      onBook();
+    }
+    // 4. Arahkan ke /hoteldetails
+    navigate("/hoteldetails");
+  };
+
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-xl flex flex-col">
       <img
@@ -19,7 +31,7 @@ export default function CardHotel({ image, name, beds, location, onBook }) {
           </div>
         </div>
         <button
-          onClick={onBook}
+          onClick={handleBookClick} // 5. Gunakan handler baru
           className="mt-4 px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500 transition"
         >
           Book Sekarang
