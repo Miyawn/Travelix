@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // Ganti dengan konfigurasi dari Firebase Console
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyB1HkQFrEItvIG2lU1Tl1WXmGYrkp8Cxfc",
   authDomain: "travelix-pabw.firebaseapp.com",
   projectId: "travelix-pabw",
