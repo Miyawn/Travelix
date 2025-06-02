@@ -26,8 +26,9 @@ function App() {
         <Route path="/hotelreceipts" element={<HotelReceipts />} />
         <Route path="/flightsdetails" element={<FlightDetails />} /> 
         <Route path="/profiluser" element={<Profile />} /> 
-        <Route path="/manageuser" element={<ManageUser />} />
+        <Route path="/dashboard" element={<ManageUser />} />
         <Route path="/flightsreceipts" element={<FlightReceipts />} />
+        {/* Tambahkan route lainnya sesuai kebutuhan */}
       </Routes>
     </BrowserRouter>
   );

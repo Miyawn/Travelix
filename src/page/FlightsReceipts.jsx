@@ -1,5 +1,5 @@
 // src/pages/FlightReceipts.jsx (atau nama file yang Anda gunakan)
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
 import FlightReceiptCard from "../components/BookingFlightConfirmationCard"; // 1. Impor komponen baru
