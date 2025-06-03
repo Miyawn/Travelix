@@ -15,30 +15,35 @@ function AdminTopBar({ adminName = "admin", welcomeText = "Welcome!" }) {
     // Kontainer utama untuk top bar
     // Styling dasar: background, padding, flex, border bawah, shadow
     // Kelas font-inter ditambahkan sesuai permintaan dari HTML
-    <div className="bg-base-100 px-6 h-16 flex justify-between items-center border-b border-base-300 shadow-sm font-inter">
+    <div className="bg-gray-100 px-6 h-16 flex justify-between items-center border-gray-200 border-b shadow-sm font-inter">
       {/* Bagian Kiri: Pesan Selamat Datang */}
       <div>
-        <h1 className="text-md md:text-lg font-medium text-base-content">
-          {welcomeText} {adminName}
+        <h1 className="text-md md:text-lg font-medium text-yellow-400">
+          {welcomeText}    {adminName}
         </h1>
       </div>
 
       {/* Bagian Kanan: Profil Pengguna dengan Dropdown */}
       <div className="dropdown dropdown-end">
         {/* Tombol untuk memicu dropdown */}
-        <label tabIndex={0} className="btn btn-ghost btn-sm flex items-center normal-case px-1 md:px-2">
+        <label
+          tabIndex={0}
+          className="btn btn-ghost btn-sm flex items-center normal-case px-1 md:px-2 hover:bg-transparent focus:bg-transparent active:bg-transparent group"
+          style={{ boxShadow: "none", border: "none" }} // Hilangkan efek shadow dari button ghost
+        >
           {/* Avatar dengan gradient */}
           <div
             className="w-8 h-8 md:w-9 md:h-9 rounded-full mr-2 flex items-center justify-center text-white font-semibold text-sm"
             style={avatarGradientStyle}
           >
-            {/* Menampilkan inisial nama admin, atau bisa diganti ikon/gambar */}
             {adminName.substring(0, 1).toUpperCase()}
           </div>
           {/* Nama Admin */}
-          <span className="text-sm text-base-content hidden sm:inline">{adminName}</span>
+          <span className="text-sm text-yellow-400 hidden sm:inline group-hover:text-blue-600 transition-colors duration-200">
+            {adminName}
+          </span>
           {/* Ikon Panah Dropdown */}
-          <ChevronDown size={18} className="ml-1 text-base-content/70" />
+          <ChevronDown size={18} className="ml-1 text-base-content/70 group-hover:text-blue-600 transition-colors duration-200" />
         </label>
         {/* Konten Dropdown */}
         <ul 

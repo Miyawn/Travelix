@@ -20,12 +20,12 @@ function AdminSidebar() {
   // Path bisa Anda sesuaikan dengan struktur routing admin Anda
   // Misalnya, jika base path admin adalah /admin, maka path menjadi /admin/users, dll.
   const navItems = [
-    { name: "Home", path: "/admin", icon: <Home size={20} /> },
-    { name: "Airline", path: "/admin/airline", icon: <Plane size={20} /> },
-    { name: "Hotel", path: "/admin/hotel", icon: <Building2 size={20} /> },
-    { name: "Users", path: "/admin/users", icon: <Users2 size={20} /> },
-    { name: "Transactions", path: "/admin/transactions", icon: <CreditCard size={20} /> },
-    { name: "Log", path: "/admin/log", icon: <FileText size={20} /> },
+    { name: "Dashboard", path: "/dashboard", icon: <Home size={20} /> },
+    { name: "Airline", path: "/dashboard/flights", icon: <Plane size={20} /> },
+    { name: "Hotel", path: "/dashboard/hotel", icon: <Building2 size={20} /> },
+    { name: "Users", path: "/dashboard/users", icon: <Users2 size={20} /> },
+    { name: "Transactions", path: "/dashboard/transactions", icon: <CreditCard size={20} /> },
+    { name: "Log", path: "/dashboard/log", icon: <FileText size={20} /> },
   ];
 
   // State untuk toggle sidebar di layar kecil (opsional, bisa diimplementasikan nanti)
@@ -34,13 +34,11 @@ function AdminSidebar() {
   return (
     // Sidebar utama, w-64 untuk lebar, bg-neutral untuk warna gelap (DaisyUI)
     // atau bg-gray-800 jika tidak pakai DaisyUI penuh
-    <div className={`w-64 bg-base-100 text-neutral-content flex flex-col h-screen transition-all duration-300`}>
+    <div className={`w-64 bg-gray-100 shadow-sm text-yellow-400 flex flex-col h-screen border-r border-gray-200 transition-all duration-300`}>
       {/* Header Sidebar */}
-      <div className="flex items-center justify-between p-4 h-16 shadow-lg"> {/* Sesuaikan tinggi dengan navbar utama jika ada */}
-        <Link to="/admin" className="flex items-center gap-2">
-          {/* Ganti dengan <img src="path/to/Frame 253.svg" alt="Travelix Logo" className="h-7 w-7" /> jika Anda punya SVG logo */}
-          <CircleUserRound size={28} className="text-primary" /> {/* Placeholder Logo */}
-          <span className="text-xl font-semibold text-primary">Travelix</span> {/* Warna text-primary dari DaisyUI */}
+      <div className="flex items-center justify-between p-4 h-16">
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <span className="text-xl font-semibold text-primary pl-1 text-yellow-400" style={{ fontFamily: 'Montserrat, sans-serif' }}>Travelix</span> {/* Warna text-primary dari DaisyUI */}
         </Link>
         {/* Ikon Menu (untuk toggle di mobile, fungsionalitas bisa ditambahkan) */}
         <button className="btn btn-ghost btn-square btn-sm lg:hidden"> {/* Hanya tampil di mobile/tablet */}
@@ -64,8 +62,8 @@ function AdminSidebar() {
               to={item.path}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-base-content/10 text-base-content' // Latar aktif (abu-abu muda di tema gelap, atau warna aksen)
-                  : 'hover:bg-base-content/5 text-neutral-content/80 hover:text-neutral-content' // Efek hover
+                  ? 'bg-base-content/5 text-yellow-500' // Latar aktif (abu-abu muda di tema gelap, atau warna aksen)
+                  : 'hover:bg-base-content/5 text-neutral-content/80 hover:text-yellow-500' // Efek hover
               }`}
             >
               {React.cloneElement(item.icon, { strokeWidth: isActive ? 2.5 : 2 })} {/* Ikon lebih tebal jika aktif */}
